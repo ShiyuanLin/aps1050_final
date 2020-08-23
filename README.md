@@ -12,8 +12,10 @@
 
 ## Runing command
 1. Follow the software installation guide from the tutorial
-1. truffle compile
-2. npm run dev
+2. truffle compile
+3. truffle migrate
+4. truffle test
+4. npm run dev
 
 ---
 
