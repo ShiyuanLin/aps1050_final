@@ -16,6 +16,28 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <style>
+    /* The alert message box */
+    .alert {
+        padding: 20px;
+        background-color: #3cb371;
+        color: white;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 20px;
+    }
+    .loginInfo {
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 20px;
+    }
+    #petStats{
+        font-size: 20px;
+        margin-bottom: 30px;
+    }
+    </style>
+
+
   </head>
   <body>
     <div class="container">
@@ -27,11 +49,23 @@
         </div>
       </div>
 
+      <div class="alert">
+          <div>Welcome!</div>
+          <div style="font-size: 15px;">
+              You can adopt a pet here for free, but a small amout of handling fee will be applied.
+          </div>
+      </div>
+
+      <div class="noBalance" style="text-align: center; margin-bottom: 15px"></div>
+
+      <div class="currUser loginInfo">Current User: NA</div>
+      <div class="currBalance loginInfo">Current balance: 0 ETH</div>
+
       <div class="row">
         <div id='petStats'>
           <p id="petsAdoptedNum" class="text-center"></p>
           <p id="clientsAdoptedNum" class="text-center"></p>
-        </div> 
+        </div>
       </div>
 
       <div id="petsRow" class="row">
