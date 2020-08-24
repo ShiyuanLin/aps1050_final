@@ -95,6 +95,10 @@ App = {
     var num_adopted = 0;
     var clients = new Set();
 
+    var petNameList = ["Frieda", "Gina", "Collins", "Melissa", "Jeanine", "Elvia",
+                       "Latisha", "Coleman", "Nichole", "Fran", "Leonor", "Dean",
+                       "Stevenson", "Kristina", "Ethel", "Terry"];
+
     $('#petsAdoptedNum').text("Total number of pets adopted: " + num_adopted)
     $('#clientsAdoptedNum').text("Total number of clients: " + clients.size)
 
@@ -113,9 +117,17 @@ App = {
       }
 
       web3.eth.getAccounts(function(error, accounts) {
+        // accounts[0] is the current user.
         if (error) {
           console.log(error);
         }
+        var currentPetsList = [];
+        for (i = 0; i < adopters.length; i++) {
+          if (adopters[i] === accounts[0]) {
+              currentPetsList.push(petNameList[i]);
+          }
+        }
+        $('.currentPets').text("The pets you have adopted: " + currentPetsList);
         web3.eth.getBalance(accounts[0], function(error, balance) {
             if (error) {
               console.log(error);
@@ -162,7 +174,6 @@ App = {
             console.log(error);
           }
           var currBalance = web3.fromWei(balance.toNumber(), 'Ether')
-          console.log(currBalance);
           if (currBalance==0) {
               $('.noBalance').text("You don't have enough balance for the pet adoption handling fee (please switch account or add more balance).").css("color", "red");
               $('.panel-pet').eq(petId).find('button').text('Adopt').attr('disabled', true);
