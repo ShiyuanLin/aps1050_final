@@ -1,9 +1,9 @@
 App = {
   web3Provider: null,
   contracts: {},
-  // gobal variable to keep track of the pets that each user has adopted.
-  // usersPets: {},
-  // TODO: Might be a new contract for tracking the pet that each user has adopted.
+  // the current user account number.
+  account: '0x0',
+  hasVoted: false,
 
   init: async function() {
     // Load pets.
@@ -57,6 +57,8 @@ App = {
       }
       const account = accounts[0];
       $('.currUser').text("Current user: " + account);
+      // Store the current account number to the gobal variable.
+      App.account = accounts[0]
       web3.eth.getBalance(account, function(error, balance) {
           if (error) {
             console.log(error);
@@ -79,6 +81,9 @@ App = {
       // Set the provider for our contract
       App.contracts.Adoption.setProvider(App.web3Provider);
 
+      // update info after user made a vote.
+      App.listenForEvents();
+
       // Use our contract to retrieve and mark the adopted pets
       return App.markAdopted();
     });
@@ -90,10 +95,31 @@ App = {
     $(document).on('click', '.btn-adopt', App.handleAdopt);
   },
 
+  // Listen for events emitted from the contract
+  listenForEvents: function() {
+      App.contracts.Adoption.deployed().then(function(instance) {
+        instance.votedEvent({}, {
+          // subscribe event for the whole blockchain.
+          fromBlock: 0,
+          toBlock: 'latest'
+        }).watch(function(error, event) {
+          // console.log("event triggered", event)
+          // Reload when a new vote is recorded
+          App.markAdopted();
+        });
+      });
+  },
+
   markAdopted: function(adopters, account) {
     var adoptionInstance;
     var num_adopted = 0;
     var clients = new Set();
+
+    // for voting.
+    var content = $("#content");
+    content.hide();
+    $('#voteDropList').hide();
+    $("#loader").show();
 
     var petNameList = ["Frieda", "Gina", "Collins", "Melissa", "Jeanine", "Elvia",
                        "Latisha", "Coleman", "Nichole", "Fran", "Leonor", "Dean",
@@ -116,6 +142,7 @@ App = {
         }
       }
 
+      // Show info (balance, pets adopted so far) for the current user.
       web3.eth.getAccounts(function(error, accounts) {
         // accounts[0] is the current user.
         if (error) {
@@ -129,19 +156,70 @@ App = {
         }
         $('.currentPets').text("The pets you have adopted: " + currentPetsList);
         web3.eth.getBalance(accounts[0], function(error, balance) {
+
             if (error) {
               console.log(error);
             }
             var currBalance = web3.fromWei(balance.toNumber(), 'Ether')
             $('.currBalance').text("Current balance: " + currBalance + ' ETH')
+            // show the candidate pets ballot option if currentBalance > 0 (allow the user to vote).
+            if (currBalance > 0) {
+                var candArray = [];
+                for (var i = 1; i <= 16; i++) { // candidatesCount=16
+                    candArray.push(adoptionInstance.candidates(i));
+                }
+
+                Promise.all(candArray).then(function(values) {
+                    var candidatesResults = $("#candidatesResults");
+                    candidatesResults.empty();
+
+                    var candidatesSelect = $('#candidatesSelect');
+                    candidatesSelect.empty();
+
+                  for (var i = 0; i < 16; i++) { // candidatesCount=16
+                    var id = values[i][0];
+                    var name = values[i][1];
+                    var voteCount = values[i][2];
+
+                    if (voteCount.toNumber()>0) {
+                        // Render candidate Result only if the vote is non-zero.
+                        var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
+                        candidatesResults.append(candidateTemplate);
+                    }
+
+                    // Render candidate ballot option
+                    var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+                    candidatesSelect.append(candidateOption);
+                  }
+                });
+                // show the voting components.
+                content.show();
+                // $('#voteDropList').show();
+                // check if user has already voted.
+                adoptionInstance.voters(accounts[0]).then(function(hasVoted) {
+                  if (hasVoted) {
+                      // Do not allow a user to vote twice.
+                      $("#voteDropList").hide();
+                      $("#hasVoted").show();
+                  } else {
+                      $("#voteDropList").show();
+                  }
+                  $("#loader").hide();
+                }).catch(function(error) {
+                  console.warn(error);
+                });
+            } else {
+                // no balance
+                $("#noBalanceForVote").show();
+            }
         });
       });
 
       /**
       * Feature 2: Record number of pets adopted, number of clients
       */
-      $('#petsAdoptedNum').text("Total number of pets adopted: " + num_adopted)
-      $('#clientsAdoptedNum').text("Total number of clients: " + clients.size)
+      $("#petsAdoptedNum").text("Total number of pets adopted: " + num_adopted)
+      $("#clientsAdoptedNum").text("Total number of clients: " + clients.size)
     }).catch(function(err) {
       console.log(err.message);
     });
@@ -175,6 +253,7 @@ App = {
           }
           var currBalance = web3.fromWei(balance.toNumber(), 'Ether')
           if (currBalance==0) {
+              // show the following message on screen.
               $('.noBalance').text("You don't have enough balance for the pet adoption handling fee (please switch account or add more balance).").css("color", "red");
               $('.panel-pet').eq(petId).find('button').text('Adopt').attr('disabled', true);
           }
@@ -206,7 +285,24 @@ App = {
           console.log(err.message);
       });
     });
+},
+
+  // handle the voting process when user click the vote button.
+  castVote: function() {
+    // the candidate petID
+    var candidateId = $('#candidatesSelect').val();
+
+    App.contracts.Adoption.deployed().then(function(instance) {
+      return instance.vote(candidateId, { from: App.account });
+    }).then(function(result) {
+      // Wait for votes to update
+      $('#voteDropList').hide();
+      $("#loader").show();
+    }).catch(function(err) {
+      console.error(err);
+    });
   }
+
 };
 
 $(function() {

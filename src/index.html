@@ -40,7 +40,9 @@
 
   </head>
   <body>
+
     <div class="container">
+
       <div class="row">
         <div class="col-xs-12 col-sm-8 col-sm-push-2">
           <h1 class="text-center">Pete's Pet Shop</h1>
@@ -67,6 +69,64 @@
           <p id="petsAdoptedNum" class="text-center"></p>
           <p id="clientsAdoptedNum" class="text-center"></p>
         </div>
+      </div>
+
+      <!-- purchase food form -->
+      <!-- <div class="container" style="width: 650px; text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 20px; margin-bottom: 12px;">
+              Purchase food for your lovely pets!
+          </div>
+          <form action="">
+            <label> Amount: </label>
+            <input type="text" id="" name="" value="0">
+            <input class="btn btn-primary" type="submit" value="Buy">
+          </form>
+
+          <div style="font-size: 15px;">
+              Price: 1 food = 0.1 ETH
+          </div>
+      </div> -->
+
+      <!-- vote form -->
+      <div class="container" style="width: 650px;">
+          <div style="font-size: 25px; margin-bottom: 12px; text-align: center">
+              Vote for the most lovely pet!
+          </div>
+          <div id="noBalanceForVote" style="font-size: 15px; color: red; margin-bottom: 20px; text-align: center; display: none;">
+              Small amout of handling fee will be applied for voting, if you don't see the vote drop down list, then it means you don't enough balance.
+          </div>
+
+          <div id="content" >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Votes</th>
+                  </tr>
+                </thead>
+                <tbody id="candidatesResults">
+                </tbody>
+              </table>
+              <hr>
+              <form onSubmit="App.castVote(); return false;" id="voteDropList" style="display: none;">
+              <div class="form-group">
+                <label for="candidatesSelect">Select Pets</label>
+                <select class="form-control" id="candidatesSelect"></select>
+              </div>
+              <button type="submit" class="btn btn-primary">Vote</button>
+              <hr>
+             </form>
+         </div>
+      </div>
+
+      <div id="loader">
+          <p class="text-center" style="font-size: 20px; color: green;">
+              Loading...</p>
+      </div>
+
+      <div id="hasVoted" style="font-size: 20px; color: green;margin-bottom: 25px; text-align: center; display: none;">
+          You have already voted!
       </div>
 
       <div id="petsRow" class="row">
