@@ -13,7 +13,7 @@
 ## Runing command
 1. Follow the software installation guide from the tutorial
 2. truffle compile
-3. truffle migrate
+3. truffle migrate --reset (make sure the Ganache is running when you run this command)
 4. truffle test
 4. npm run dev
 
